@@ -25,7 +25,7 @@ import networkx as nx
 #Type 2 = Close, Same, Left, In ("on the green")
 #Type 3 = Over the Green
 
-# Fairway = Type1ModelFree("Fairway")
+# Fairway = Type1ModelFree("Fairway")lkjh
 # Ravine = Type1ModelFree("Ravine")
 # Close = Type2ModelFree("Close")
 # Same = Type2ModelFree("Same")
