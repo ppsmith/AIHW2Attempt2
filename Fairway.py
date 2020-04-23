@@ -14,6 +14,8 @@ class Fairway1:
         return self.Number
 
     def addToActions(self, action):
+        if action in self.getActions():
+            return
         self.Actions.append(action)
 
     def getActions(self):

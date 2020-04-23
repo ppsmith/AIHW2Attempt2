@@ -1,7 +1,3 @@
-from Type1ModelFree import Type1ModelFree
-from Type2ModelFree import Type2ModelFree
-from Type3ModelFree import Type3ModelFree
-
 from CloseToPin import CloseToPin
 from InTheHole import InTheHole
 from LeftOfThePin import LeftOfThePin
@@ -17,99 +13,27 @@ from Pitch import *
 from Putt import *
 import numpy as np
 import random
-import sys
 import pylab as pl
-import networkx as nx
-
-#Type 1 = Ravine and Fairway
-#Type 2 = Close, Same, Left, In ("on the green")
-#Type 3 = Over the Green
-
-# Fairway = Type1ModelFree("Fairway")lkjh
-# Ravine = Type1ModelFree("Ravine")
-# Close = Type2ModelFree("Close")
-# Same = Type2ModelFree("Same")
-# Left = Type2ModelFree("Left")
-# In = Type2ModelFree("In")
-# Over = Type3ModelFree("Over")
-#
-# #Find local location of input
-# #data = open(input('Please give file path:'), 'r')
-#
-# data = open('C:\\Users\\ppsmith\\Desktop\\learning.txt')
-#
-# #read each line of data
-# for entry in data:
-#     #make sure that data hasn't ended
-#     if entry != '\n':
-#         #Each line goes start location, action, end location, and probability of ending in end state
-#         #Each aspect is separated by a /, so find positions of /
-#         sub = entry
-#         startlocation = "invalid"
-#         action = "invalid"
-#         endlocation = "invalid"
-#         prob = "0"
-#         current_index = 0
-#         num_slash = 0
-#         #break up each line to find the start location, the action, the end location, and the probability
-#         while (current_index != -1):
-#             current_index = sub.find("/")
-#             print(current_index)
-#             num_slash = num_slash + 1
-#             if (num_slash == 1): #start location
-#                 startlocation = sub[0:current_index]
-#                 sub = sub[current_index + 1:len(sub)] #create substring starting from action
-#             elif (num_slash == 2): #action
-#                 action = sub[0:current_index] #create substring starting from end location
-#                 sub = sub[current_index + 1:len(sub)]
-#             elif (num_slash == 3): #end location and probability
-#                 endlocation = sub[0:current_index]
-#                 prob = sub[current_index + 2:len(sub)]
-#                 sub = sub[current_index + 1:len(sub)]
-#             else:
-#                 break
-#         prob = float(prob) #convert probability from string to float
-#
-#         #fill out each class depending on information in line read
-#         if (startlocation == "Fairway"):
-#             Fairway.setProb(prob, action, endlocation)
-#         elif (startlocation == "Ravine"):
-#             Ravine.setProb(prob, action, endlocation)
-#         elif (startlocation == "Close"):
-#             Close.setProb(prob, endlocation)
-#         elif (startlocation == "Same"):
-#             Same.setProb(prob, endlocation)
-#         elif (startlocation == "Left"):
-#             Left.setProb(prob, endlocation)
-#         elif (startlocation == "In"):
-#             In.setProb(prob, endlocation)
-#         elif (startlocation == "Over"):
-#             Over.setProb(prob, action, endlocation)
-#     #if entry is '\n', data has ended
-#     if entry == '\n':
-#         break
-
-#print(f'Fairway: {Fairway.printState()}')
-#print(f'Ravine: {Ravine.printState()}')
-#print(f'Close: {Close.printState()}')
-#print(f'State: {Same.printState()}')
-#print(f'Left: {Left.printState()}')
-#print(f'In: {In.printState()}')
-#print(f'Over: {Over.printState()}')
 
 #dictionareis to hash indexes to states/actions
 states = {}
 actions = {}
 
-
 #define states
 fairway = Fairway1()
+states["fairway".upper()] = fairway
 ravine = Ravine1()
+states["ravine".upper()] = ravine
 leftOfPin = LeftOfThePin()
+states["left".upper()] = leftOfPin
 closeToPin = CloseToPin()
+states["close".upper()] = closeToPin
 inTheHole = InTheHole()
+states["in".upper()] = inTheHole
 sameLevel = SameLevelAsPin()
+states["same".upper()] = sameLevel
 overTheGreen = OverTheGreen()
+states["over".upper()] = overTheGreen
 
 #define actions and add to dictionaries
 atPin = AtPin(1)
@@ -125,120 +49,111 @@ states[pitch.getNumber()] = pitch
 putt = Putt(6)
 states[putt.getNumber()] = putt
 
-
-#hash state numbers to probabilites
-dict1 = {}
-dict1[closeToPin.getNumber()] = .25
-dict1[sameLevel.getNumber()] = .35
-dict1[ravine.getNumber()] = .15
-dict1[leftOfPin.getNumber()] = .1
-dict1[overTheGreen.getNumber()] = .15
+data = open('C:\\Users\\ppsmith\\Desktop\\learning.txt')
+#
+# #read each line of data
+for entry in data:
+    #make sure that data hasn't ended
+    if entry != '\n':
+        #Each line goes start location, action, end location, and probability of ending in end state
+        #Each aspect is separated by a /, so find positions of /
+        sub = entry
+        startlocation = "invalid"
+        action = "invalid"
+        endlocation = "invalid"
+        prob = "0"
+        current_index = 0
+        num_slash = 0
+#         #break up each line to find the start location, the action, the end location, and the probability
+        while (current_index != -1):
+            current_index = sub.find("/")
+            print(current_index)
+            num_slash = num_slash + 1
+            if (num_slash == 1): #start location
+                startlocation = sub[0:current_index]
+                sub = sub[current_index + 1:len(sub)] #create substring starting from action
+            elif (num_slash == 2): #action
+                action = sub[0:current_index] #create substring starting from end location
+                sub = sub[current_index + 1:len(sub)]
+            elif (num_slash == 3): #end location and probability
+                endlocation = sub[0:current_index]
+                prob = sub[current_index + 2:len(sub)]
+                sub = sub[current_index + 1:len(sub)]
+            else:
+                break
+        prob = float(prob) #convert probability from string to float
+#
+        #fill out each class depending on information in line read
+        if (startlocation == "Fairway") and action == "At":
+            dictFairwayAt = {}
+            dictFairwayAt[states[endlocation.upper()].getNumber()] = prob
+            fairway.addToActions(atPin)
+        elif (startlocation == "Fairway") and action == "Past":
+            dictFairwayPast = {}
+            dictFairwayPast[states[endlocation.upper()].getNumber()] = prob
+            fairway.addToActions(pastPin)
+        elif (startlocation == "Fairway") and action == "Left":
+            dictFairwayLeft = {}
+            dictFairwayLeft[states[endlocation.upper()].getNumber()] = prob
+            fairway.addToActions(leftPin)
+        if (startlocation == "Ravine") and action == "At":
+            dictRavineAt = {}
+            dictRavineAt[states[endlocation.upper()].getNumber()] = prob
+            ravine.addToActions(atPin)
+        elif (startlocation == "Ravine") and action == "Past":
+            dictRavinePast = {}
+            dictRavinePast[states[endlocation.upper()].getNumber()] = prob
+            ravine.addToActions(pastPin)
+        elif (startlocation == "Ravine") and action == "Left":
+            dictRavineLeft = {}
+            dictRavineLeft[states[endlocation.upper()].getNumber()] = prob
+            ravine.addToActions(leftPin)
+        elif (startlocation == "Close") and action == "Putt":
+            dictClosePutt = {}
+            dictClosePutt[states[endlocation.upper()].getNumber()] = prob
+            closeToPin.addToActions(putt)
+        elif (startlocation == "Same") and action == "Putt":
+            dictSamePutt = {}
+            dictSamePutt[states[endlocation.upper()].getNumber()] = prob
+            sameLevel.addToActions(putt)
+        elif (startlocation == "Left"):
+            dictLeft = {}
+            dictLeft[states[endlocation.upper()].getNumber()] = prob
+            leftOfPin.addToActions(putt)
+        elif (startlocation == "Over") and action == "Chip":
+            dictOverChip = {}
+            dictOverChip[states[endlocation.upper()].getNumber()] = prob
+            overTheGreen.addToActions(chip)
+        elif (startlocation == "Over") and action == "Pitch":
+            dictOverPitch = {}
+            dictOverPitch[states[endlocation.upper()].getNumber()] = prob
+            overTheGreen.addToActions(pitch)
+    #if entry is '\n', data has ended
+    if entry == '\n':
+        break
 
 #create connectiong beween the probabilties of moving to a new states from a previous state
-atPin.setStates(fairway.getNumber(), dict1)
+atPin.setStates(fairway.getNumber(), dictFairwayAt)
 
-dict1 = {}
-dict1[closeToPin.getNumber()] = .2
-dict1[sameLevel.getNumber()] = .35
-dict1[ravine.getNumber()] = .15
-dict1[leftOfPin.getNumber()] = .2
-dict1[overTheGreen.getNumber()] = .1
+atPin.setStates(ravine.getNumber(), dictRavineAt)
 
-atPin.setStates(ravine.getNumber(), dict1)
+pastPin.setStates(fairway.getNumber(),  dictFairwayPast)
 
-dict1 = {}
-dict1[ravine.getNumber()] = .02
-dict1[closeToPin.getNumber()] = .18
-dict1[sameLevel.getNumber()] = .5
-dict1[leftOfPin.getNumber()] = .1
-dict1[overTheGreen.getNumber()] = .2
+pastPin.setStates(ravine.getNumber(), dictRavinePast)
 
-pastPin.setStates(fairway.getNumber(),  dict1)
+leftPin.setStates(fairway.getNumber(), dictFairwayLeft)
 
-dict1 = {}
-dict1[ravine.getNumber()] = .02
-dict1[closeToPin.getNumber()] = .05
-dict1[sameLevel.getNumber()] = .6
-dict1[leftOfPin.getNumber()] = .18
-dict1[overTheGreen.getNumber()] = .15
+leftPin.setStates(ravine.getNumber(), dictRavineLeft)
 
-pastPin.setStates(ravine.getNumber(), dict1)
+chip.setStates(overTheGreen.getNumber(), dictOverChip)
 
-dict1 = {}
-dict1[ravine.getNumber()] = .1
-dict1[closeToPin.getNumber()] = .05
-dict1[sameLevel.getNumber()] = .2
-dict1[leftOfPin.getNumber()] = .5
-dict1[overTheGreen.getNumber()] = .15
+pitch.setStates(overTheGreen.getNumber(), dictOverPitch)
 
-leftPin.setStates(fairway.getNumber(), dict1)
+putt.setStates(sameLevel.getNumber(), dictSamePutt)
 
-dict1 = {}
-dict1[ravine.getNumber()] = .08
-dict1[closeToPin.getNumber()] = .02
-dict1[sameLevel.getNumber()] = .2
-dict1[leftOfPin.getNumber()] = .6
-dict1[overTheGreen.getNumber()] = .1
+putt.setStates(leftOfPin.getNumber(), dictLeft)
 
-leftPin.setStates(ravine.getNumber(), dict1)
-
-dict1 = {}
-dict1[ravine.getNumber()] = .09
-dict1[closeToPin.getNumber()] = .3
-dict1[sameLevel.getNumber()] = .3
-dict1[leftOfPin.getNumber()] = .2
-dict1[overTheGreen.getNumber()] = .1
-dict1[inTheHole.getNumber()] = .01
-
-chip.setStates(overTheGreen.getNumber(), dict1)
-
-dict1 = {}
-dict1[ravine.getNumber()] = .04
-dict1[closeToPin.getNumber()] = .4
-dict1[sameLevel.getNumber()] = .4
-dict1[leftOfPin.getNumber()] = .1
-dict1[overTheGreen.getNumber()] = .04
-dict1[inTheHole.getNumber()] = .02
-
-pitch.setStates(overTheGreen.getNumber(), dict1)
-
-dict1 = {}
-dict1[closeToPin.getNumber()] = .75
-dict1[sameLevel.getNumber()] = .2
-dict1[leftOfPin.getNumber()] = .04
-dict1[inTheHole.getNumber()] = .01
-
-putt.setStates(sameLevel.getNumber(), dict1)
-
-dict1 = {}
-dict1[closeToPin.getNumber()] = .49
-dict1[sameLevel.getNumber()] = .3
-dict1[leftOfPin.getNumber()] = .2
-dict1[inTheHole.getNumber()] = .01
-
-putt.setStates(leftOfPin.getNumber(), dict1)
-
-dict1 = {}
-dict1[closeToPin.getNumber()] = .15
-dict1[inTheHole.getNumber()] = .85
-
-putt.setStates(closeToPin.getNumber(), dict1)
-
-#create pssible lists of actions for state
-fairway.addToActions(pastPin)
-fairway.addToActions(leftPin)
-fairway.addToActions(atPin)
-
-ravine.addToActions(pastPin)
-ravine.addToActions(leftPin)
-ravine.addToActions(atPin)
-
-closeToPin.addToActions(putt)
-leftOfPin.addToActions(putt)
-sameLevel.addToActions(putt)
-
-overTheGreen.addToActions(chip)
-overTheGreen.addToActions(pitch)
+putt.setStates(closeToPin.getNumber(), dictClosePutt)
 
 #set goal
 goal = inTheHole
@@ -250,7 +165,7 @@ edges = [(fairway, atPin), (fairway, leftPin), (fairway, pastPin), (ravine, atPi
 
 MATRIX_SIZE = 7
 M = np.matrix(np.ones(shape=(MATRIX_SIZE, MATRIX_SIZE)))
-M *= -1
+M *= 0
 
 #populate M matrix with reward for each state
 for point in edges:
@@ -280,11 +195,13 @@ print(M)
 Q = np.matrix(np.zeros([MATRIX_SIZE, MATRIX_SIZE]))
 
 #discount paramter
-gamma = 0.9
+gamma = 0.6
 
 #learning rate
-alpha = 1
+alpha = .1
 
+#explore rate
+exp = .2
 # start on the fairway
 initial_state = 1
 
@@ -311,8 +228,7 @@ available_action = available_actions(initial_state)
 #Chooses one of the available actions. Epsilon controls the ratio between exploration and exploitation. Higher epsilon,
 #more exploration
 def sample_next_action(available_actions_range):
-    epsilon = .5
-    if random.uniform(0, 1) < epsilon:
+    if random.uniform(0, 1) < exp:
         next_action = np.random.choice(available_action, 1)
     else:
         tmp = np.max(Q, axis=1).shape[0] - 1
