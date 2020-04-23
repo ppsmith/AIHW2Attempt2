@@ -86,47 +86,47 @@ for entry in data:
         #fill out each class depending on information in line read
         if (startlocation == "Fairway") and action == "At":
             dictFairwayAt = {}
-            dictFairwayAt[states[endlocation.upper()].getNumber()] = prob
+            dictFairwayAt[states[startlocation.upper()].getNumber()] = prob
             fairway.addToActions(atPin)
         elif (startlocation == "Fairway") and action == "Past":
             dictFairwayPast = {}
-            dictFairwayPast[states[endlocation.upper()].getNumber()] = prob
+            dictFairwayPast[states[startlocation.upper()].getNumber()] = prob
             fairway.addToActions(pastPin)
         elif (startlocation == "Fairway") and action == "Left":
             dictFairwayLeft = {}
-            dictFairwayLeft[states[endlocation.upper()].getNumber()] = prob
+            dictFairwayLeft[states[startlocation.upper()].getNumber()] = prob
             fairway.addToActions(leftPin)
         if (startlocation == "Ravine") and action == "At":
             dictRavineAt = {}
-            dictRavineAt[states[endlocation.upper()].getNumber()] = prob
+            dictRavineAt[states[startlocation.upper()].getNumber()] = prob
             ravine.addToActions(atPin)
         elif (startlocation == "Ravine") and action == "Past":
             dictRavinePast = {}
-            dictRavinePast[states[endlocation.upper()].getNumber()] = prob
+            dictRavinePast[states[startlocation.upper()].getNumber()] = prob
             ravine.addToActions(pastPin)
         elif (startlocation == "Ravine") and action == "Left":
             dictRavineLeft = {}
-            dictRavineLeft[states[endlocation.upper()].getNumber()] = prob
+            dictRavineLeft[states[startlocation.upper()].getNumber()] = prob
             ravine.addToActions(leftPin)
         elif (startlocation == "Close") and action == "Putt":
             dictClosePutt = {}
-            dictClosePutt[states[endlocation.upper()].getNumber()] = prob
+            dictClosePutt[states[startlocation.upper()].getNumber()] = prob
             closeToPin.addToActions(putt)
         elif (startlocation == "Same") and action == "Putt":
             dictSamePutt = {}
-            dictSamePutt[states[endlocation.upper()].getNumber()] = prob
+            dictSamePutt[states[startlocation.upper()].getNumber()] = prob
             sameLevel.addToActions(putt)
         elif (startlocation == "Left"):
             dictLeft = {}
-            dictLeft[states[endlocation.upper()].getNumber()] = prob
+            dictLeft[states[startlocation.upper()].getNumber()] = prob
             leftOfPin.addToActions(putt)
         elif (startlocation == "Over") and action == "Chip":
             dictOverChip = {}
-            dictOverChip[states[endlocation.upper()].getNumber()] = prob
+            dictOverChip[states[startlocation.upper()].getNumber()] = prob
             overTheGreen.addToActions(chip)
         elif (startlocation == "Over") and action == "Pitch":
             dictOverPitch = {}
-            dictOverPitch[states[endlocation.upper()].getNumber()] = prob
+            dictOverPitch[states[startlocation.upper()].getNumber()] = prob
             overTheGreen.addToActions(pitch)
     #if entry is '\n', data has ended
     if entry == '\n':
@@ -248,8 +248,7 @@ def update(current_state, action, gamma):
             max_index = int(np.random.choice(max_index, size=1))
         else:
             max_index = int(max_index)
-        max_value = Q[action[0].getNumber(), max_index]*alpha
-                    # *action[0].getProb(current_state)[current_state]
+        max_value = Q[action[0].getNumber(), max_index]*alpha*action[0].getProb(current_state)[current_state]
         Q[current_state, action[0].getNumber()] = round(M[current_state, action[0].getNumber()] + gamma * max_value, 3)
         if (np.max(Q) > 0):
             return (np.sum(Q / np.max(Q)))
