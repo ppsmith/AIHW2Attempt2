@@ -36,20 +36,33 @@ overTheGreen = OverTheGreen()
 states["over".upper()] = overTheGreen
 
 #define actions and add to dictionaries
-atPin = AtPin(1)
+atPin = AtPin(0)
 states[atPin.getNumber()] = atPin
-pastPin = PastPin(2)
+pastPin = PastPin(1)
 states[pastPin.getNumber()] = pastPin
-leftPin = LeftPin(3)
+leftPin = LeftPin(2)
 states[leftPin.getNumber()] = leftPin
-chip = Chip(4)
+chip = Chip(3)
 states[chip.getNumber()] = chip
-pitch = Pitch(5)
+pitch = Pitch(4)
 states[pitch.getNumber()] = pitch
-putt = Putt(6)
+putt = Putt(5)
 states[putt.getNumber()] = putt
 
-data = open('C:\\Users\\ppsmith\\Desktop\\learning.txt')
+
+dictFairwayAt = {}
+dictFairwayPast = {}
+dictFairwayLeft = {}
+dictRavineAt = {}
+dictRavinePast = {}
+dictRavineLeft = {}
+dictClosePutt = {}
+dictSamePutt = {}
+dictLeft = {}
+dictOverChip = {}
+dictOverPitch = {}
+
+data = open(input('Please give file path'), 'r')
 #
 # #read each line of data
 for entry in data:
@@ -67,7 +80,7 @@ for entry in data:
 #         #break up each line to find the start location, the action, the end location, and the probability
         while (current_index != -1):
             current_index = sub.find("/")
-            print(current_index)
+            # print(current_index)
             num_slash = num_slash + 1
             if (num_slash == 1): #start location
                 startlocation = sub[0:current_index]
@@ -82,51 +95,43 @@ for entry in data:
             else:
                 break
         prob = float(prob) #convert probability from string to float
-#
+        if len(str(prob)) <= 3:
+            prob = prob/10
+        else:
+            prob = prob/100
         #fill out each class depending on information in line read
         if (startlocation == "Fairway") and action == "At":
-            dictFairwayAt = {}
-            dictFairwayAt[states[startlocation.upper()].getNumber()] = prob
+            dictFairwayAt[states[endlocation.upper()].getNumber()] = prob
             fairway.addToActions(atPin)
         elif (startlocation == "Fairway") and action == "Past":
-            dictFairwayPast = {}
-            dictFairwayPast[states[startlocation.upper()].getNumber()] = prob
+            dictFairwayPast[states[endlocation.upper()].getNumber()] = prob
             fairway.addToActions(pastPin)
         elif (startlocation == "Fairway") and action == "Left":
-            dictFairwayLeft = {}
-            dictFairwayLeft[states[startlocation.upper()].getNumber()] = prob
+            dictFairwayLeft[states[endlocation.upper()].getNumber()] = prob
             fairway.addToActions(leftPin)
-        if (startlocation == "Ravine") and action == "At":
-            dictRavineAt = {}
-            dictRavineAt[states[startlocation.upper()].getNumber()] = prob
+        elif (startlocation == "Ravine") and action == "At":
+            dictRavineAt[states[endlocation.upper()].getNumber()] = prob
             ravine.addToActions(atPin)
         elif (startlocation == "Ravine") and action == "Past":
-            dictRavinePast = {}
-            dictRavinePast[states[startlocation.upper()].getNumber()] = prob
+            dictRavinePast[states[endlocation.upper()].getNumber()] = prob
             ravine.addToActions(pastPin)
         elif (startlocation == "Ravine") and action == "Left":
-            dictRavineLeft = {}
-            dictRavineLeft[states[startlocation.upper()].getNumber()] = prob
+            dictRavineLeft[states[endlocation.upper()].getNumber()] = prob
             ravine.addToActions(leftPin)
         elif (startlocation == "Close") and action == "Putt":
-            dictClosePutt = {}
-            dictClosePutt[states[startlocation.upper()].getNumber()] = prob
+            dictClosePutt[states[endlocation.upper()].getNumber()] = prob
             closeToPin.addToActions(putt)
         elif (startlocation == "Same") and action == "Putt":
-            dictSamePutt = {}
-            dictSamePutt[states[startlocation.upper()].getNumber()] = prob
+            dictSamePutt[states[endlocation.upper()].getNumber()] = prob
             sameLevel.addToActions(putt)
         elif (startlocation == "Left"):
-            dictLeft = {}
-            dictLeft[states[startlocation.upper()].getNumber()] = prob
+            dictLeft[states[endlocation.upper()].getNumber()] = prob
             leftOfPin.addToActions(putt)
         elif (startlocation == "Over") and action == "Chip":
-            dictOverChip = {}
-            dictOverChip[states[startlocation.upper()].getNumber()] = prob
+            dictOverChip[states[endlocation.upper()].getNumber()] = prob
             overTheGreen.addToActions(chip)
         elif (startlocation == "Over") and action == "Pitch":
-            dictOverPitch = {}
-            dictOverPitch[states[startlocation.upper()].getNumber()] = prob
+            dictOverPitch[states[endlocation.upper()].getNumber()] = prob
             overTheGreen.addToActions(pitch)
     #if entry is '\n', data has ended
     if entry == '\n':
@@ -155,6 +160,9 @@ putt.setStates(leftOfPin.getNumber(), dictLeft)
 
 putt.setStates(closeToPin.getNumber(), dictClosePutt)
 
+putt.setStates(inTheHole.getNumber(), dictClosePutt)
+
+
 #set goal
 goal = inTheHole
 
@@ -164,8 +172,8 @@ edges = [(fairway, atPin), (fairway, leftPin), (fairway, pastPin), (ravine, atPi
          (overTheGreen, chip), (overTheGreen, pitch)]
 
 MATRIX_SIZE = 7
-M = np.matrix(np.ones(shape=(MATRIX_SIZE, MATRIX_SIZE)))
-M *= 0
+M = np.matrix(np.ones(shape=(7, 6)))
+M *= -1
 
 #populate M matrix with reward for each state
 for point in edges:
@@ -188,20 +196,18 @@ for point in edges:
         M[point[0].getNumber(), point[1].getNumber()] = 1
 
 #set goal reward
-M[goal.getNumber(), goal.getNumber()] = 100
+M[goal.getNumber(), goal.getNumber()-1] = 100
 print('\n')
 print(M)
 
 Q = np.matrix(np.zeros([MATRIX_SIZE, MATRIX_SIZE]))
 
 #discount paramter
-gamma = 0.6
+gamma = 0.9
 
 #learning rate
-alpha = .1
+alpha = 1
 
-#explore rate
-exp = .2
 # start on the fairway
 initial_state = 1
 
@@ -227,17 +233,22 @@ available_action = available_actions(initial_state)
 
 #Chooses one of the available actions. Epsilon controls the ratio between exploration and exploitation. Higher epsilon,
 #more exploration
-def sample_next_action(available_actions_range):
-    if random.uniform(0, 1) < exp:
+def sample_next_action(available_actions_range, current_state):
+    epsilon = .9
+    if random.uniform(0, 1) < epsilon:
         next_action = np.random.choice(available_action, 1)
     else:
-        tmp = np.max(Q, axis=1).shape[0] - 1
-        next_action = states[tmp]
-        next_action = [next_action]
+        try:
+            next_step_index = np.where(Q[current_state,] == np.max(Q[current_state,]))[1]
+            # tmp = np.max(Q, axis=1).shape[0] - 1
+            next_action = states[next_step_index[0]]
+            next_action = [next_action]
+        except KeyError:
+            return None
     #next_action[0].getProb()
     return next_action
 
-action = sample_next_action(available_action)  #say next action is chip with value 1, action = 1
+action = sample_next_action(available_action, initial_state)  #say next action is chip with value 1, action = 1
 
 
 # Updates the Q-Matrix according to the path chosen
@@ -283,16 +294,18 @@ def updateAll(current_state, action, gamma):
 update(initial_state, action, gamma)
 
 scores = []
-epsilon = 1000
+epsilon = 500
 
-#run 1000 iterations of the golf game
+#run epsilon iterations of the golf game
 for i in range(epsilon):
     current_state = np.random.randint(2, int(Q.shape[0]))
-    available_action = available_actions(current_state)
-    if available_action is None:
-        #scores.append(3.5)
+    if (current_state == 6):
         continue
-    action = sample_next_action(available_action)
+    available_action = available_actions(current_state)
+    # if available_action is None:
+    #     #scores.append(3.5)
+    #     continue
+    action = sample_next_action(available_action, current_state)
     score = update(current_state, action, gamma)
     scores.append(score)
 
@@ -305,7 +318,7 @@ current_state = 0
 steps = [current_state]
 
 #generate the best path to take
-while current_state != 6:
+while current_state != 5:
     print(current_state)
     next_step_index = np.where(Q[current_state,] == np.max(Q[current_state,]))[1]
 
@@ -324,8 +337,3 @@ pl.plot(scores)
 pl.xlabel('No of iterations')
 pl.ylabel('Reward gained')
 pl.show()
-
-#attmept to go through entire Q matrix, but doesnt work for mysterious reasons
-# for i, row in enumerate(Q):
-#     for j, column in enumerate(Q):
-#         print(f'Combination for state {(j)}, action{(i)}: {Q.item((j, i))}')
