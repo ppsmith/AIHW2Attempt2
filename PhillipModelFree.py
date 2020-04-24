@@ -263,7 +263,7 @@ def update(current_state, action, gamma):
             max_index = int(np.random.choice(max_index, size=1))
         else:
             max_index = int(max_index)
-        max_value = Q[action[0].getNumber(), max_index] * alpha * action[0].getProb(current_state)[current_state]
+        max_value = Q[action[0].getNumber(), max_index] * alpha
         Q[current_state, action[0].getNumber()] = round(M[current_state, action[0].getNumber()] + gamma * max_value, 3)
         if (np.max(Q) > 0):
             return (np.sum(Q / np.max(Q)))
