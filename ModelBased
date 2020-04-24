@@ -196,8 +196,6 @@ for point in edges:
 
 # set goal reward
 M[goal.getNumber(), goal.getNumber() - 1] = 100
-#print('\n')
-#print(M)
 
 Q = np.matrix(np.zeros([MATRIX_SIZE, MATRIX_SIZE]))
 
@@ -221,8 +219,6 @@ def available_actions(state):
         return None
     else:
         available_action = sameLevel.getActions()
-    # current_state_row = M[state,]
-    # available_action = np.where(current_state_row >= 0)[1]
 
     # returns a list of action objects
     return available_action
@@ -244,7 +240,6 @@ def sample_next_action(available_actions_range, current_state):
             next_action = [next_action]
         except KeyError:
             return None
-    # next_action[0].getProb()
     return next_action
 
 
@@ -269,8 +264,7 @@ def update(current_state, action, gamma):
         print(current_state)
         print(action)
 
-
-# ignore
+#ignore
 def updateAll(current_state, action, gamma):
     try:
         row = 0
@@ -309,9 +303,6 @@ for i in range(epsilon):
     if (current_state == 6):
         continue
     available_action = available_actions(current_state)
-    # if available_action is None:
-    #     #scores.append(3.5)
-    #     continue
     action = sample_next_action(available_action, current_state)
     trial_matrix[i, 1] = action[0].getNumber()
     score = update(current_state, action, gamma)
